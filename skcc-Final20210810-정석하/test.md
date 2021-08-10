@@ -168,5 +168,6 @@ ALTER TABLE authors SET TBLPROPERTIES('EXTERNAL'='TRUE')
 6. result query
 SELECT b.id, b.first_name, b.last_name, COUNT(a.id) as num_posts FROM posts a RIGHT OUTER JOIN authors b on a.author_id = b.id GROUP BY b.id, b.first_name, b.last_name 
 
-7. hue UI¿¡¼­ result query export
+7. hdfs to mysql
+sqoop export --connect jdbc:mysql://cm:3306/test --username training --password training --table results --export-dir hdfs://m1:8020/user/training/results
 
