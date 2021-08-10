@@ -138,3 +138,35 @@ sudo systemctl start cloudera-scm-agent
 
 
 
+
+
+
+
+Sqoop으로 mysql to Hive 실습
+
+
+1. test Database 생성
+CREATE DATABASE test DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+
+2. authors, posts Table 생성
+scp -i skcc.pem post.sql centos@ip:/tmp/posts.sql
+scp -i skcc.pem authors.sql centos@ip:/tmp/authors.sql
+mysql -u root -p < posts.sql
+mysql -u root -p < authors.sql
+
+3. 
+GRANT ALL ON test.* TO 'training'@'%' IDENTIFIED BY 'training'; 
+
+4. sqoop으로 hive table에 넣기
+sqoop import --connect jdbc:mysql://cm:3306/test --username training --password training --table authors --target-dir /user/training/authors --fields-terminated-by "," --hive-import --create-hive-table --hive-table default.authors
+
+sqoop import --connect jdbc:mysql://cm:3306/test --username training --password training --table posts --target-dir /user/training/posts --fields-terminated-by "," --hive-import --create-hive-table --hive-table default.posts
+
+5. authors 테이블 external로 변경
+ALTER TABLE authors SET TBLPROPERTIES('EXTERNAL'='TRUE')
+
+6. result query
+SELECT b.id, b.first_name, b.last_name, COUNT(a.id) as num_posts FROM posts a RIGHT OUTER JOIN authors b on a.author_id = b.id GROUP BY b.id, b.first_name, b.last_name 
+
+7. hue UI에서 result query export
+
